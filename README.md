@@ -246,11 +246,11 @@ client/src/
 
 Set `DB_DRIVER` in `.env`:
 
-| Driver     | Use for                   | Config                          |
-| ---------- | ------------------------- | ------------------------------- |
-| `json`     | prototypes, demos         | `JSON_DB_PATH=./data/db.json`   |
-| `sqlite`   | small apps, single server | `SQLITE_PATH=./data/app.sqlite` |
-| `postgres` | anything bigger           | `DATABASE_URL=postgres://…`     |
+| Driver     | Use for                   | Config                           |
+| ---------- | ------------------------- | -------------------------------- |
+| `json`     | prototypes, demos         | `JSON_DB_PATH=../data/db.json`   |
+| `sqlite`   | small apps, single server | `SQLITE_PATH=../data/app.sqlite` |
+| `postgres` | anything bigger           | `DATABASE_URL=postgres://…`      |
 
 Routes and sockets only see the interfaces in `server/src/db/types.ts`, so switching drivers needs no code changes. IDs are UUIDs everywhere, so data shapes stay portable between drivers. SQLite and Postgres apply migrations on startup (`db/*/migrations.ts`). These are append-only: add a new entry for each change and never edit an applied one. A small key/value `settings` repo is also available for app-wide config (`db.settings.get/set/delete`).
 

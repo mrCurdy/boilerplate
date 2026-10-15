@@ -9,8 +9,8 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
   DB_DRIVER: z.enum(['json', 'sqlite', 'postgres']).default('sqlite'),
-  JSON_DB_PATH: z.string().default('./data/db.json'),
-  SQLITE_PATH: z.string().default('./data/app.sqlite'),
+  JSON_DB_PATH: z.string().default('../data/db.json'),
+  SQLITE_PATH: z.string().default('../data/app.sqlite'),
   DATABASE_URL: z.string().optional(),
 
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 chars'),
