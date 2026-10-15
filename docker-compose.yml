@@ -1,0 +1,58 @@
+# Usage:
+#   docker compose up --build                         -> app with SQLite (default)
+#   DB_DRIVER=json docker compose up --build          -> app with JSON file store
+#   DB_DRIVER=postgres docker compose --profile postgres up --build -> app + PostgreSQL
+#   docker compose --profile postgres up -d postgres  -> only Postgres (for local `npm run dev`)
+# Values come from your shell or .env; defaults below are for local use only.
+
+services:
+  app:
+    build: .
+    image: boilerplate-app
+    restart: unless-stopped
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      CLIENT_URL: ${PUBLIC_URL:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DB_DRIVER: ${DB_DRIVER:-sqlite}
+      DATABASE_URL: postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-app}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET in .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET in .env}
+      ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
+      REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-7d}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_NAME: ${ADMIN_NAME:-Admin}
+      # true = behind HTTPS (Secure cookies, HSTS). Set false for plain-http hosts.
+      HTTPS_ONLY: ${HTTPS_ONLY:-true}
+    volumes:
+      - app-data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+
+  postgres:
+    image: postgres:17-alpine
+    profiles: [postgres]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  app-data:
+  pg-data:
