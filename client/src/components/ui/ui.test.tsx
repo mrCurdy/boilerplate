@@ -6,9 +6,12 @@ import { ConfirmProvider, useConfirm } from '@/context/ConfirmContext';
 import {
   AddForm,
   Button,
+  CardHeader,
+  CardTitle,
   ClearableInput,
   CommitInput,
   CommitTextarea,
+  DragHandle,
   FormField,
   Input,
   Switch,
@@ -128,5 +131,21 @@ describe('UI components', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Ask' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
     expect(await screen.findByText('answer: false')).toBeInTheDocument();
+  });
+
+  it('DragHandle is a named button that passes the hook handlers on, in a CardHeader grip', async () => {
+    const onKeyDown = vi.fn();
+    render(
+      <CardHeader grip={<DragHandle label="Move Alpha" onKeyDown={onKeyDown} />}>
+        <CardTitle>Alpha</CardTitle>
+      </CardHeader>,
+    );
+    const grip = screen.getByRole('button', { name: 'Move Alpha' });
+    expect(grip).toHaveAttribute('title', 'Move Alpha');
+    expect(grip).toHaveClass('touch-none');
+    expect(screen.getByRole('heading', { name: 'Alpha' })).toBeInTheDocument();
+    grip.focus();
+    await userEvent.keyboard('{ArrowDown}');
+    expect(onKeyDown).toHaveBeenCalled();
   });
 });

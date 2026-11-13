@@ -52,6 +52,7 @@ import {
 import { useConfirm } from '@/context/ConfirmContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useToast } from '@/context/ToastContext';
+import { GroupedLists, SortableCards } from './uikit/DragDemos';
 
 const SECTIONS = [
   'Tokens',
@@ -61,6 +62,7 @@ const SECTIONS = [
   'Data display',
   'Overlays',
   'Layout',
+  'Drag and drop',
 ] as const;
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, '-');
 
@@ -597,6 +599,18 @@ export default function UiKit() {
               </CardBody>
             </Card>
           </div>
+        </Section>
+
+        <Section
+          title="Drag and drop"
+          description="useDragSort / useListsDragSort (lib) + DragHandle and CardHeader grip. Mouse, touch, or ↑/↓ on a focused grip."
+        >
+          <Demo label="Card grid (free mode)" className="block">
+            <SortableCards />
+          </Demo>
+          <Demo label="Rows between cards" className="block">
+            <GroupedLists />
+          </Demo>
         </Section>
       </div>
 

@@ -9,6 +9,7 @@ export * from './Checkbox';
 export * from './ClearableInput';
 export * from './CommitInput';
 export * from './ConfirmDialog';
+export * from './DragHandle';
 export * from './Dropdown';
 export * from './EmptyState';
 export * from './FormField';

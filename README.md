@@ -241,14 +241,16 @@ server/tests/      supertest + socket.io-client, run per DB driver
 client/src/
   styles/index.css design tokens (parameters → light/dark colors → Tailwind utilities)
   components/ui/   the reusable style system (Button, Input, Card, Modal, Table, Slider, …,
-                   CommitInput/CommitTextarea, ClearableInput, AddForm)
+                   CommitInput/CommitTextarea, ClearableInput, AddForm, DragHandle)
   components/layout, components/auth (ProtectedRoute, RoleGate)
   context/         Auth · Theme · Appearance · Toast · Confirm (useConfirm)
   lib/             api.ts (fetch + silent refresh) · socket.ts · appearance.ts · cn.ts · format.ts · errors.ts
                    numbers.ts (parseQty, parseNumber) · download.ts (downloadBlob)
+                   useDragSort.ts · useListsDragSort.ts (drag-and-drop reordering)
   test/            setup.ts (jest-dom, cleanup) · fetch.ts (mockApi: a fake API for page tests)
   hooks/           useSocketEvent · useConnectionStatus
   pages/           Home · UiKit · Appearance · Notes · Chat · Profile · Moderation · Admin · Login/Register
+                   uikit/DragDemos.tsx (drag-and-drop demos, with a pointer-drag test)
 ```
 
 ### Database drivers
@@ -285,7 +287,8 @@ Rooms used: `user:<id>` (all of a user's tabs), `role:admin` (live stats), `chat
 1. **Tokens:** `client/src/styles/index.css` has three layers. Layer 1 is a few _parameters_ (brand hue/chroma, neutral tint, font, radius, density, shadow). Layer 2 is semantic colors derived from them for light and `[data-theme='dark']`. Layer 3 is `@theme`, which maps everything to Tailwind utilities (`bg-surface`, `text-fg-muted`, `bg-primary`, `rounded-md`, `p-4`, …).
 2. **Components:** `client/src/components/ui/`, all imported from `@/components/ui`. Variants use `class-variance-authority`. Every component accepts `className`, merged with `cn()` so your classes win over the defaults.
 3. **Showcase:** the `/ui` page renders every component and variant.
-4. **Helpers in `index.css`:** `focus-ring`, `scrollbar-thin` / `scrollbar-thick`, `no-spin` (number inputs without arrows). On touch screens fields get at least 16px text, so iOS doesn't zoom in on focus.
+4. **Drag and drop:** `useDragSort(count, onMove, { free })` reorders one list (`free`: a grid, the card under the pointer is `over`); `useListsDragSort(counts, onMove)` also moves rows between lists. Both work with mouse, touch and ↑/↓ on the focused `<DragHandle>`; put the grip in a card with `<CardHeader grip={…}>`. See `pages/uikit/DragDemos.tsx`; its test shows how to fake row positions in jsdom.
+5. **Helpers in `index.css`:** `focus-ring`, `scrollbar-thin` / `scrollbar-thick`, `no-spin` (number inputs without arrows). On touch screens fields get at least 16px text, so iOS doesn't zoom in on focus.
 
 ### Appearance customizer
 
@@ -310,6 +313,7 @@ To add a parameter: add it to `appearanceSchema` and `DEFAULT_APPEARANCE`, map i
 | a 404 for a missing row | `found(await db.x.find(id), 'X')` from `server/src/lib/params.ts` (route params: `param(req, 'id')`)            |
 | a role                | `ROLES` in `shared/src/roles.ts` (order = rank) → `roleTone` in `AppShell.tsx`                                    |
 | an appearance setting | [Appearance customizer](#appearance-customizer)                                                                   |
+| drag to reorder       | `useDragSort` / `useListsDragSort` + `<DragHandle {...sort.handleProps(i)} />` (see `pages/uikit/DragDemos.tsx`) |
 | a yes/no question     | `const confirm = useConfirm()` → `if (await confirm({ title: 'Delete?' })) …` (see `Notes.tsx`)                   |
 
 ---

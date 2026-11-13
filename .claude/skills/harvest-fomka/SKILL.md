@@ -77,7 +77,7 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
     `useConfirm()`. `test/setup.ts` polyfills `<dialog>` `showModal`/`close` if jsdom lacks them.
     Untested again (no Node, no node_modules): steps 1–3 still need lint/typecheck/test.
 
-- [ ] **4. Drag-and-drop containers**
+- [x] **4. Drag-and-drop containers**
   - `FOMKA/client/src/lib/useDragSort.ts` (incl. `free` mode) and `lib/useListsDragSort.ts`.
   - Generic pieces around them in `components/ui/`: a `DragHandle` (grip button, `touch-none`,
     `aria-label`, ↑/↓ keys via `handleProps`), and a `CardHeader` slot for the grip (from
@@ -87,6 +87,8 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
     `pages/checklist/TaskGroupCard.tsx`, `TaskList.tsx`).
   - Tests: port the pointer-drag test technique from `FOMKA/client/src/pages/Checklist.test.tsx`
     (faked row positions) to a hook/demo test.
+  - `CardHeader` got a `grip` prop instead of a separate component. Demos live in
+    `pages/uikit/DragDemos.tsx` (test next to it). Untested again (no Node).
 
 - [ ] **5. Palettes and extra components**
   - Palette switcher: `PALETTES` in `ThemeContext.tsx`, `[data-palette]` blocks in `index.css`,

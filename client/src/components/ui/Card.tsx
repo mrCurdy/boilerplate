@@ -1,4 +1,4 @@
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 export function Card({ className, ...props }: ComponentProps<'div'>) {
@@ -10,12 +10,30 @@ export function Card({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-export function CardHeader({ className, ...props }: ComponentProps<'div'>) {
+/** `grip`: a `<DragHandle>` shown before the title and description (for draggable cards). */
+export function CardHeader({
+  className,
+  grip,
+  children,
+  ...props
+}: ComponentProps<'div'> & { grip?: ReactNode }) {
+  if (grip)
+    return (
+      <div
+        className={cn('flex items-start gap-1 border-b border-border px-5 py-4', className)}
+        {...props}
+      >
+        <div className="-my-1 -ml-3 flex">{grip}</div>
+        <div className="flex min-w-0 flex-col gap-1">{children}</div>
+      </div>
+    );
   return (
     <div
       className={cn('flex flex-col gap-1 border-b border-border px-5 py-4', className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   );
 }
 
