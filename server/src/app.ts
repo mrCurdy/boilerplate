@@ -60,7 +60,12 @@ export function createApp(ctx: AppContext) {
   // ---- Static client (production) ----
   const clientDist = resolve(config.CLIENT_DIST ?? '../client/dist');
   if (config.NODE_ENV === 'production' && existsSync(clientDist)) {
-    app.use(express.static(clientDist, { index: false, maxAge: '1y', immutable: true }));
+    // Only Vite's hashed files are safe to cache forever; theme-init.js, favicon etc. are not.
+    app.use(
+      '/assets',
+      express.static(resolve(clientDist, 'assets'), { maxAge: '1y', immutable: true }),
+    );
+    app.use(express.static(clientDist, { index: false }));
     // SPA fallback: every non-API GET returns index.html so client-side routing works.
     app.get('/{*splat}', (_req, res) => {
       res.setHeader('Cache-Control', 'no-cache');

@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import type { SystemInfo } from '@app/shared';
+import { build } from '../build';
 import type { AppContext } from '../context';
 
 export function systemRouter({ db, auth, realtime, config, startedAt }: AppContext) {
   const r = Router();
 
-  /** Public liveness probe (used by Docker healthcheck). */
+  /** Public liveness probe (used by the Docker healthcheck), and which build is running. */
   r.get('/health', (_req, res) => {
-    res.json({ status: 'ok', uptimeSec: Math.round((Date.now() - startedAt) / 1000) });
+    res.json({ status: 'ok', uptimeSec: Math.round((Date.now() - startedAt) / 1000), ...build });
   });
 
   /** Public, non-sensitive config the client may show (e.g. active DB driver badge). */

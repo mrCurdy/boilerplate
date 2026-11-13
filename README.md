@@ -226,11 +226,13 @@ server/src/
   config.ts        env validation (fails fast on bad config)
   context.ts       AppContext: config, db, tokens, auth middleware, realtime hooks
   app.ts           express app: security, routers, static client, errors
+  build.ts         build stamp (builtAt, commit) shown by /api/health, set by tsup.config.ts
   db/              types.ts (repo interfaces) · json/ · sqlite/ · postgres/ · seed.ts
   auth/            tokens.ts (JWT + refresh rotation) · middleware.ts (requireAuth / requireRole)
   routes/          auth · users · notes · settings · system
   sockets/         handshake auth · chat · presence
   middleware/      validate · error · rateLimit
+  lib/             errors.ts (HttpError) · params.ts (param, found) · logger.ts
 server/tests/      supertest + socket.io-client, run per DB driver
 client/src/
   styles/index.css design tokens (parameters → light/dark colors → Tailwind utilities)
@@ -297,6 +299,7 @@ To add a parameter: add it to `appearanceSchema` and `DEFAULT_APPEARANCE`, map i
 | a DB entity           | [walkthrough](#walkthrough-adding-a-feature-end-to-end) steps 1–3                                                 |
 | a socket event        | [Realtime](#realtime-socketio)                                                                                    |
 | an env variable       | `server/src/config.ts` schema → `.env.example` → `docker-compose.yml`                                             |
+| a 404 for a missing row | `found(await db.x.find(id), 'X')` from `server/src/lib/params.ts` (route params: `param(req, 'id')`)            |
 | a role                | `ROLES` in `shared/src/roles.ts` (order = rank) → `roleTone` in `AppShell.tsx`                                    |
 | an appearance setting | [Appearance customizer](#appearance-customizer)                                                                   |
 
@@ -310,7 +313,21 @@ DB_DRIVER=json docker compose up --build                           # JSON file
 DB_DRIVER=postgres docker compose --profile postgres up --build    # + PostgreSQL 17
 ```
 
-The app runs on http://localhost:3000. One container serves both the API and the built SPA. The image is multi-stage, runs as a non-root user, and has a healthcheck on `/api/health`. Compose reads `JWT_*`, `ADMIN_*` and so on from `.env`.
+The app runs on http://localhost:3000. One container serves both the API and the built SPA. The image is multi-stage, runs as a non-root user, and has a healthcheck on `/api/health`. Compose reads `JWT_*`, `ADMIN_*` and so on from `.env`. Container logs rotate (json-file, 3 × 10 MB).
+
+`/api/health` also says which build is running: `builtAt` and `commit` (stamped by `server/tsup.config.ts`; `commit: "unknown"` in Docker, where `.git` is ignored; `commit: "source"` when run from source).
+
+### Deploying to a server
+
+Keep a deployable branch (`production` by default). On the server (Docker with the compose plugin):
+
+```bash
+git clone -b production <repo-url> app && cd app
+cp .env.example .env   # JWT secrets, ADMIN_*, PUBLIC_URL, APP_PORT; HTTPS_ONLY=true behind TLS
+./deploy.sh            # later updates: just ./deploy.sh again
+```
+
+`deploy.sh` fast-forwards to `origin/production`, copies the live SQLite database to `backups/app-<time>.db` (newest 10 kept), rebuilds the image, restarts and waits for the health check; if the new version isn't healthy it starts the previous image again. `--no-pull` deploys the checkout as it is. The DB copy is skipped for `json` and `postgres` (back those up yourself; with postgres also set `COMPOSE_PROFILES=postgres` in `.env`). Rename `IMAGE`, `SERVICE` and `BACKUP_PREFIX` at the top of the script with your project. Behind a reverse proxy on the same host, set `APP_BIND=127.0.0.1` and `HTTPS_ONLY=true`.
 
 ### Production checklist
 
@@ -343,6 +360,7 @@ Server tests live in `server/tests/` (`helpers.ts` has `setup`, `signUp`, `signI
 
 | Symptom                                               | Fix                                                                                                                                               |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The app behaves unlike the code (e.g. a new field is ignored) | Check what is serving :3000: `curl -s localhost:3000/api/health`. A `builtAt` older than your change (or `npm start` running `dist/`) is a stale build: rebuild/restart, or use `npm run dev` (`commit: "source"`) |
 | Server exits with `Invalid environment configuration` | The message lists each bad variable. Usually the JWT secrets are missing or shorter than 32 chars                                                 |
 | `better-sqlite3` error after switching Node versions  | `npm rebuild better-sqlite3`                                                                                                                      |
 | Logged out on every reload in production              | Site served over plain http with `HTTPS_ONLY=true`, so the browser drops the Secure refresh cookie. Use HTTPS (or `HTTPS_ONLY=false` for testing) |

@@ -16,6 +16,8 @@ describe.each(DRIVERS)('REST API [%s]', (driver) => {
     it('health is public', async () => {
       const res = await env.agent().get('/api/health').expect(200);
       expect(res.body.status).toBe('ok');
+      // From source there is no build stamp (tsup sets it, src/build.ts)
+      expect(res.body).toMatchObject({ commit: 'source', builtAt: null });
     });
 
     it('meta exposes the db driver', async () => {

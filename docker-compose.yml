@@ -11,7 +11,8 @@ services:
     image: boilerplate-app
     restart: unless-stopped
     ports:
-      - '${APP_PORT:-3000}:3000'
+      # APP_BIND=127.0.0.1 when a reverse proxy on the same host handles HTTPS
+      - '${APP_BIND:-0.0.0.0}:${APP_PORT:-3000}:3000'
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -30,6 +31,11 @@ services:
       HTTPS_ONLY: ${HTTPS_ONLY:-true}
     volumes:
       - app-data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
     depends_on:
       postgres:
         condition: service_healthy
