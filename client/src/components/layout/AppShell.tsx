@@ -20,6 +20,7 @@ import { Avatar, Badge, Button, Dropdown, Tooltip } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useConnectionStatus } from '@/hooks/useSocket';
 import { cn } from '@/lib/cn';
+import { PaletteToggle } from './PaletteToggle';
 import { ThemeToggle } from './ThemeToggle';
 
 interface NavItem {
@@ -141,6 +142,7 @@ export function AppShell() {
               <SlidersHorizontal className="h-4 w-4" />
             </Button>
           </Tooltip>
+          <PaletteToggle />
           <ThemeToggle />
           {user ? (
             <Dropdown

@@ -164,6 +164,23 @@ export const APPEARANCE_PRESETS: { name: string; appearance: Appearance }[] = [
   },
 ];
 
+/** The colour knobs. A palette is a preset reduced to these, so switching it keeps font, radius etc. */
+export const COLOR_KEYS = ['brandHue', 'brandChroma', 'neutralHue', 'neutralTint'] as const;
+export type AppearanceColors = Pick<Appearance, (typeof COLOR_KEYS)[number]>;
+
+const colorsOf = (a: Appearance): AppearanceColors =>
+  Object.fromEntries(COLOR_KEYS.map((k) => [k, a[k]])) as AppearanceColors;
+
+/** Colour schemes for the header palette toggle (one per preset). */
+export const PALETTES: { name: string; colors: AppearanceColors }[] = APPEARANCE_PRESETS.map(
+  (p) => ({ name: p.name, colors: colorsOf(p.appearance) }),
+);
+
+/** Index of the palette `a` uses, or -1 when its colours are custom. */
+export function paletteIndex(a: Appearance): number {
+  return PALETTES.findIndex((p) => COLOR_KEYS.every((k) => p.colors[k] === a[k]));
+}
+
 /** Google Fonts stylesheet URL for a font, or null for system fonts. */
 export function fontStylesheetUrl(font: FontKey): string | null {
   const f = FONTS[font] as { google?: string };

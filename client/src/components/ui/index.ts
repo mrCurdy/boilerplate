@@ -16,6 +16,7 @@ export * from './FormField';
 export * from './Input';
 export * from './Modal';
 export * from './Select';
+export * from './Salute';
 export * from './Skeleton';
 export * from './Slider';
 export * from './Spinner';

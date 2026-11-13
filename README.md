@@ -241,8 +241,9 @@ server/tests/      supertest + socket.io-client, run per DB driver
 client/src/
   styles/index.css design tokens (parameters → light/dark colors → Tailwind utilities)
   components/ui/   the reusable style system (Button, Input, Card, Modal, Table, Slider, …,
-                   CommitInput/CommitTextarea, ClearableInput, AddForm, DragHandle)
-  components/layout, components/auth (ProtectedRoute, RoleGate)
+                   CommitInput/CommitTextarea, ClearableInput, AddForm, DragHandle, Salute)
+  components/layout AppShell, PageHeader, ThemeToggle, PaletteToggle
+  components/auth  ProtectedRoute, RoleGate
   context/         Auth · Theme · Appearance · Toast · Confirm (useConfirm)
   lib/             api.ts (fetch + silent refresh) · socket.ts · appearance.ts · cn.ts · format.ts · errors.ts
                    numbers.ts (parseQty, parseNumber) · download.ts (downloadBlob)
@@ -296,6 +297,7 @@ The `/appearance` page changes the Layer 1 parameters live: brand hue and satura
 
 - `shared/src/appearance.ts` defines the parameters (zod schema, defaults, presets, fonts) and `appearanceToCssVars()`. The client sets those variables on `<html>`, so every component re-themes with no component changes.
 - Precedence: **your browser's overrides → site default → built-in default**. Overrides live in `localStorage`. `public/theme-init.js` reapplies them before first paint, so reloads don't flash.
+- **Palettes:** the header's palette button cycles `PALETTES` (each preset reduced to its four colour knobs) and saves them as local overrides like the page does, so font, radius etc. stay. To add one, add a preset.
 - **Admins** can publish the current look as the site default (`PUT /api/settings/appearance`). It's stored via `db.settings`, pushed live to every client with the `settings:appearance` socket event, and fetched by signed-out visitors on load.
 
 To add a parameter: add it to `appearanceSchema` and `DEFAULT_APPEARANCE`, map it in `appearanceToCssVars`, use the variable in `index.css` (with a default in Layer 1), and add a control on `pages/Appearance.tsx`.
@@ -314,6 +316,8 @@ To add a parameter: add it to `appearanceSchema` and `DEFAULT_APPEARANCE`, map i
 | a role                  | `ROLES` in `shared/src/roles.ts` (order = rank) → `roleTone` in `AppShell.tsx`                                    |
 | an appearance setting   | [Appearance customizer](#appearance-customizer)                                                                   |
 | drag to reorder         | `useDragSort` / `useListsDragSort` + `<DragHandle {...sort.handleProps(i)} />` (see `pages/uikit/DragDemos.tsx`)  |
+| a colour palette        | a preset in `APPEARANCE_PRESETS` (`shared/src/appearance.ts`); the header toggle picks it up                      |
+| a celebration           | `{done && <Salute text="Well done!" onDone={end} />}` (`end` from `useCallback`)                                  |
 | a yes/no question       | `const confirm = useConfirm()` → `if (await confirm({ title: 'Delete?' })) …` (see `Notes.tsx`)                   |
 
 ---

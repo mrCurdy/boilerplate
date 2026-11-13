@@ -11,7 +11,7 @@ import {
   Settings,
   Trash2,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import {
   AddForm,
@@ -34,6 +34,7 @@ import {
   FormField,
   Input,
   Modal,
+  Salute,
   Select,
   Skeleton,
   Slider,
@@ -136,6 +137,8 @@ export default function UiKit() {
   const [switchOn, setSwitchOn] = useState(true);
   const [loading, setLoading] = useState(false);
   const [volume, setVolume] = useState(40);
+  const [salute, setSalute] = useState(false);
+  const endSalute = useCallback(() => setSalute(false), []);
 
   return (
     <>
@@ -385,6 +388,12 @@ export default function UiKit() {
             >
               Warning toast
             </Button>
+          </Demo>
+          <Demo label="Salute (canvas fireworks, skipped with reduced motion)">
+            <Button variant="outline" onClick={() => setSalute(true)} disabled={salute}>
+              Celebrate
+            </Button>
+            {salute && <Salute text="Well done!" onDone={endSalute} />}
           </Demo>
           <Demo label="Loading">
             <Spinner size="sm" />

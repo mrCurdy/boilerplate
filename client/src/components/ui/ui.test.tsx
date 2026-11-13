@@ -14,6 +14,7 @@ import {
   DragHandle,
   FormField,
   Input,
+  Salute,
   Switch,
   Tooltip,
 } from '.';
@@ -149,5 +150,22 @@ describe('UI components', () => {
     grip.focus();
     await userEvent.keyboard('{ArrowDown}');
     expect(onKeyDown).toHaveBeenCalled();
+  });
+});
+
+describe('Salute', () => {
+  it('draws on a hidden canvas and calls onDone when finished', () => {
+    vi.useFakeTimers();
+    // jsdom has no canvas: the animation is skipped, only the timer runs.
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    const onDone = vi.fn();
+    const { container } = render(<Salute text="Done" onDone={onDone} />);
+    expect(container.querySelector('canvas')).toHaveAttribute('aria-hidden');
+    vi.advanceTimersByTime(1000);
+    expect(onDone).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(5000);
+    expect(onDone).toHaveBeenCalledOnce();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 });

@@ -90,7 +90,7 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
   - `CardHeader` got a `grip` prop instead of a separate component. Demos live in
     `pages/uikit/DragDemos.tsx` (test next to it). Untested again (no Node).
 
-- [ ] **5. Palettes and extra components**
+- [x] **5. Palettes and extra components**
   - Palette switcher: `PALETTES` in `ThemeContext.tsx`, `[data-palette]` blocks in `index.css`,
     `public/theme-init.js`, `components/layout/PaletteToggle.tsx`, in the `AppShell` header.
   - The boilerplate also has the Appearance customizer, whose inline vars on `<html>` beat
@@ -99,6 +99,9 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
     clear the brand/neutral overrides. Pick one, note it under this step.
   - `FOMKA/client/src/components/Salute.tsx` (canvas fireworks that spell a text) → `components/ui/`,
     demo button on UiKit.
+  - Palettes are Appearance presets: `PALETTES` = each preset's colour knobs (`shared/src/appearance.ts`),
+    the toggle calls `update(colors)`. So no `[data-palette]` CSS, no `ThemeContext`/`theme-init.js` change.
+    Steps 1–5 now pass lint/typecheck/tests (Node available).
 
 - [ ] **6. i18n core**
   - `FOMKA/client/src/context/I18nContext.tsx`, `i18n/plural.ts`, `i18n/en.ts` (only the generic
