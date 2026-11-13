@@ -52,14 +52,17 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
     to the README troubleshooting table.
   - Done on branch `harvest`. `param`/`found` used in `routes/users.ts`. deploy.sh refuses to run
     without `.env` (JWT secrets are required) and reads `DB_DRIVER` from the running container.
+    Committed untested (no Node in that session): run lint/typecheck/tests before step 3.
 
-- [ ] **2. Shared helpers and client test tooling**
+- [x] **2. Shared helpers and client test tooling**
   - `FOMKA/shared/src/dates.ts` (local `YYYY-MM-DD`: `formatDate`, `addDays`, `todayLocal`…) + a
     `dateSchema` in `schemas.ts` + tests; then `dateParam` in `server/src/lib/params.ts`.
   - `FOMKA/client/src/lib/numbers.ts` (`parseQty`, `parseNumber`) with a test, `lib/download.ts`.
   - `FOMKA/client/src/test/setup.ts` (`afterEach(cleanup)`) and `test/fetch.ts` (`mockApi`). The
     boilerplate's `api.ts` uses bearer tokens + refresh; make sure `mockApi` works with it and add
     one example test (e.g. `pages/Login.test.tsx`, pattern from `FOMKA/client/src/pages/Login.test.tsx`).
+  - `mockApi`'s route also gets the request `Headers` (bearer check). `shared` got vitest + a test
+    script, root `npm test` runs it first. Login test mocks `@/lib/socket`. Untested (no Node).
 
 - [ ] **3. UI kit additions**
   - `FOMKA/client/src/components/ui/CommitInput.tsx` (`CommitInput`, `CommitTextarea`).

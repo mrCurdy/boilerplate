@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { ROLES } from './roles';
 
+/** A local calendar day, 'YYYY-MM-DD' (see dates.ts). */
+export const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+
 export const registerSchema = z.object({
   email: z.email().trim().toLowerCase(),
   name: z.string().trim().min(2).max(50),

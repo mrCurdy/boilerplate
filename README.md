@@ -209,6 +209,7 @@ These keep the codebase reusable. Please follow them as the app grows.
 - **Reuse before you write:** check `components/ui` (and the `/ui` page) first. A new generic component goes in `components/ui`, gets exported from its `index.ts` and demoed on `UiKit.tsx`. Feature-specific components stay next to their page.
 - **One source of truth for data shapes:** types and zod schemas live in `shared/`. The server validates with them (`validateBody`); forms can pre-validate with the same schema (see `Register.tsx`).
 - **Storage access only through `Db` repositories:** routes and sockets never import a specific driver.
+- **Dates:** calendar days are local `YYYY-MM-DD` strings (`formatDate` in `shared/src/dates.ts`, `dateSchema`, `dateParam`), never `toISOString()`, which is UTC and can be a day off.
 - **Authorization lives on the server:** `requireAuth` / `requireRole` on routes, `socket.data.user` in socket handlers. `ProtectedRoute` and `RoleGate` on the client are UX only.
 - **Config via env:** add new variables to the zod schema in `server/src/config.ts` (the server fails fast on invalid config), to `.env.example`, and to `docker-compose.yml` if Docker needs them.
 - **Errors:** throw `HttpError` on the server. On the client, show `toast.error(…)` or an inline `<Alert>`.
@@ -222,6 +223,7 @@ These keep the codebase reusable. Please follow them as the app grows.
 
 ```
 shared/src/        roles.ts · types.ts · schemas.ts (zod) · socket.ts (event maps) · appearance.ts
+                   dates.ts (local YYYY-MM-DD: formatDate, addDays, todayLocal, dateRange)
 server/src/
   config.ts        env validation (fails fast on bad config)
   context.ts       AppContext: config, db, tokens, auth middleware, realtime hooks
@@ -232,7 +234,7 @@ server/src/
   routes/          auth · users · notes · settings · system
   sockets/         handshake auth · chat · presence
   middleware/      validate · error · rateLimit
-  lib/             errors.ts (HttpError) · params.ts (param, found) · logger.ts
+  lib/             errors.ts (HttpError) · params.ts (param, dateParam, found) · logger.ts
 server/tests/      supertest + socket.io-client, run per DB driver
 client/src/
   styles/index.css design tokens (parameters → light/dark colors → Tailwind utilities)
@@ -240,6 +242,8 @@ client/src/
   components/layout, components/auth (ProtectedRoute, RoleGate)
   context/         Auth · Theme · Appearance · Toast
   lib/             api.ts (fetch + silent refresh) · socket.ts · appearance.ts · cn.ts · format.ts · errors.ts
+                   numbers.ts (parseQty, parseNumber) · download.ts (downloadBlob)
+  test/            setup.ts (jest-dom, cleanup) · fetch.ts (mockApi: a fake API for page tests)
   hooks/           useSocketEvent · useConnectionStatus
   pages/           Home · UiKit · Appearance · Notes · Chat · Profile · Moderation · Admin · Login/Register
 ```
@@ -345,14 +349,23 @@ cp .env.example .env   # JWT secrets, ADMIN_*, PUBLIC_URL, APP_PORT; HTTPS_ONLY=
 ## Testing
 
 ```bash
-npm test                                                                      # JSON + SQLite + client
+npm test                                                                      # shared + JSON + SQLite + client
 TEST_DATABASE_URL=postgres://u:p@localhost:5432/test_db npm test -w server   # + Postgres
 ```
 
 The Postgres run **truncates all tables** in that database, so point it at a throwaway one, for example:
 `docker run --rm -d -p 55432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test postgres:17-alpine`.
 
-Server tests live in `server/tests/` (`helpers.ts` has `setup`, `signUp`, `signIn`, `bearer`). Client component tests sit next to the components (`*.test.tsx`).
+Shared tests sit next to the code (`shared/src/*.test.ts`). Server tests live in `server/tests/` (`helpers.ts` has `setup`, `signUp`, `signIn`, `bearer`). Client tests sit next to the components and pages (`*.test.tsx`).
+
+Page tests fake the API with `mockApi` from `client/src/test/fetch.ts`: one function answers each call by method and path, and gets the body and headers (so a test can check the bearer token). See `pages/Login.test.tsx`; it also mocks `@/lib/socket`, since jsdom has no server to connect to.
+
+```ts
+const fetch = mockApi((method, path, body, headers) => {
+  if (path === '/auth/refresh') return unauthorized;
+  if (method === 'POST' && path === '/notes') return { status: 201, body: { note } };
+}); // anything else → 404; afterEach(() => vi.unstubAllGlobals())
+```
 
 ---
 
