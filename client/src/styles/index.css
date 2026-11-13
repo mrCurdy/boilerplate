@@ -163,6 +163,18 @@
   }
 }
 
+/*
+ * iOS zooms in on any field whose text is under 16px when it gets focus (and stays zoomed in).
+ * Touch screens get 16px text in fields; unlayered so it beats the utilities.
+ */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
 /* Reusable patterns that are not worth a component */
 @utility focus-ring {
   @apply outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-bg;
@@ -170,6 +182,20 @@
 @utility scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+}
+/* Full-size bar for wide tables you scroll sideways with the mouse */
+@utility scrollbar-thick {
+  scrollbar-width: auto;
+  scrollbar-color: var(--border) transparent;
+}
+/* Number inputs without spinner arrows (they get in the way in narrow cells) */
+@utility no-spin {
+  -moz-appearance: textfield;
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
 /* Range thumb for <Slider> (pseudo-elements can't be targeted with utilities cleanly) */

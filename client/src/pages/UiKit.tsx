@@ -14,6 +14,7 @@ import {
 import { useState, type ReactNode } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import {
+  AddForm,
   Alert,
   Avatar,
   Badge,
@@ -25,6 +26,9 @@ import {
   CardHeader,
   CardTitle,
   Checkbox,
+  ClearableInput,
+  CommitInput,
+  CommitTextarea,
   Dropdown,
   EmptyState,
   FormField,
@@ -45,6 +49,7 @@ import {
   Tabs,
   Textarea,
 } from '@/components/ui';
+import { useConfirm } from '@/context/ConfirmContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useToast } from '@/context/ToastContext';
 
@@ -121,7 +126,10 @@ export default function UiKit() {
   const { resolved, setTheme } = useTheme();
   const toast = useToast();
   const [modalOpen, setModalOpen] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const confirm = useConfirm();
+  const [saved, setSaved] = useState('Edit me, then press Enter');
+  const [limit, setLimit] = useState<string | null>(null);
+  const [things, setThings] = useState<string[]>(['First thing']);
   const [tab, setTab] = useState('overview');
   const [switchOn, setSwitchOn] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -296,6 +304,43 @@ export default function UiKit() {
               disabled
             />
           </Demo>
+          <Demo
+            label="Save once (CommitInput, ClearableInput, AddForm)"
+            className="grid gap-4 sm:grid-cols-2"
+          >
+            <FormField label="CommitInput" hint={`Saved: ${saved}`}>
+              <CommitInput value={saved} onCommit={setSaved} />
+            </FormField>
+            <FormField
+              label="ClearableInput"
+              hint={limit === null ? 'Automatic' : `Manual: ${limit}`}
+            >
+              <ClearableInput
+                type="number"
+                value={limit ?? 10}
+                onCommit={setLimit}
+                onClear={limit === null ? undefined : () => setLimit(null)}
+              />
+            </FormField>
+            <FormField
+              label="CommitTextarea"
+              hint="Saves on blur, Escape reverts"
+              className="sm:col-span-2"
+            >
+              <CommitTextarea value={saved} onCommit={setSaved} rows={2} />
+            </FormField>
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <AddForm
+                placeholder="New thing"
+                label="Add"
+                onAdd={(name) => {
+                  setThings((t) => [...t, name]);
+                  return true;
+                }}
+              />
+              <p className="text-sm text-fg-muted">{things.join(', ')}</p>
+            </div>
+          </Demo>
         </Section>
 
         <Section
@@ -455,10 +500,20 @@ export default function UiKit() {
           </Card>
         </Section>
 
-        <Section title="Overlays" description="Modal (native <dialog>), Dropdown, Tooltip.">
+        <Section title="Overlays" description="Modal (native <dialog>), useConfirm(), Dropdown, Tooltip.">
           <Demo label="Modal & dropdown">
             <Button onClick={() => setModalOpen(true)}>Open modal</Button>
-            <Button variant="danger" onClick={() => setConfirmOpen(true)}>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                const ok = await confirm({
+                  title: 'Delete item?',
+                  description: 'This action cannot be undone.',
+                  confirmLabel: 'Delete',
+                });
+                if (ok) toast.error('Item deleted');
+              }}
+            >
               Confirm dialog
             </Button>
             <Dropdown
@@ -480,6 +535,9 @@ export default function UiKit() {
             />
             <Tooltip content="I'm a tooltip">
               <Button variant="ghost">Hover me</Button>
+            </Tooltip>
+            <Tooltip content="Lined up with my right edge" align="end">
+              <Button variant="ghost">align=&quot;end&quot;</Button>
             </Tooltip>
           </Demo>
         </Section>
@@ -572,30 +630,6 @@ export default function UiKit() {
           </FormField>
         </div>
       </Modal>
-
-      <Modal
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        size="sm"
-        title="Delete item?"
-        description="This action cannot be undone."
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => {
-                setConfirmOpen(false);
-                toast.error('Item deleted');
-              }}
-            >
-              Delete
-            </Button>
-          </>
-        }
-      />
     </>
   );
 }

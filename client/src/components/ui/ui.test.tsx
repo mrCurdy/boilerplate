@@ -1,7 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { Button, FormField, Input, Switch } from '.';
+import { useState } from 'react';
+import { ConfirmProvider, useConfirm } from '@/context/ConfirmContext';
+import {
+  AddForm,
+  Button,
+  ClearableInput,
+  CommitInput,
+  CommitTextarea,
+  FormField,
+  Input,
+  Switch,
+  Tooltip,
+} from '.';
 
 describe('UI components', () => {
   it('Button shows a spinner and is disabled while loading', () => {
@@ -27,5 +39,94 @@ describe('UI components', () => {
     render(<Switch label="Dark" checked={false} onCheckedChange={onChange} />);
     await userEvent.click(screen.getByRole('switch'));
     expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  it('CommitInput saves once on Enter, only when changed', async () => {
+    const onCommit = vi.fn();
+    render(<CommitInput aria-label="Name" value="Ada" onCommit={onCommit} />);
+    const input = screen.getByLabelText('Name');
+    await userEvent.click(input);
+    await userEvent.keyboard('{Enter}');
+    expect(onCommit).not.toHaveBeenCalled();
+    await userEvent.type(input, 'm{Enter}');
+    expect(onCommit).toHaveBeenCalledExactlyOnceWith('Adam');
+  });
+
+  it('CommitInput reverts on Escape and follows value while idle', async () => {
+    const onCommit = vi.fn();
+    const { rerender } = render(<CommitInput aria-label="Name" value="Ada" onCommit={onCommit} />);
+    const input = screen.getByLabelText('Name');
+    await userEvent.type(input, 'xyz{Escape}');
+    expect(input).toHaveValue('Ada');
+    await userEvent.tab();
+    expect(onCommit).not.toHaveBeenCalled();
+    rerender(<CommitInput aria-label="Name" value="Grace" onCommit={onCommit} />);
+    expect(input).toHaveValue('Grace');
+  });
+
+  it('CommitTextarea saves a pending draft on unmount', async () => {
+    const onCommit = vi.fn();
+    const { unmount } = render(<CommitTextarea aria-label="Bio" value="" onCommit={onCommit} />);
+    await userEvent.type(screen.getByLabelText('Bio'), 'line 1{Enter}line 2');
+    expect(onCommit).not.toHaveBeenCalled();
+    unmount();
+    expect(onCommit).toHaveBeenCalledWith('line 1\nline 2');
+  });
+
+  it('ClearableInput shows the clear button only with onClear', async () => {
+    const onClear = vi.fn();
+    const { rerender } = render(<ClearableInput aria-label="Limit" value={5} onCommit={() => {}} />);
+    expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
+    rerender(<ClearableInput aria-label="Limit" value={5} onCommit={() => {}} onClear={onClear} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(onClear).toHaveBeenCalledOnce();
+  });
+
+  it('AddForm trims, and clears only after a truthy onAdd', async () => {
+    const onAdd = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    render(<AddForm placeholder="New thing" label="Add" onAdd={onAdd} />);
+    const input = screen.getByLabelText('New thing');
+    await userEvent.type(input, '  milk  {Enter}');
+    expect(onAdd).toHaveBeenLastCalledWith('milk');
+    expect(input).toHaveValue('  milk  ');
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+    expect(input).toHaveValue('');
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+    expect(onAdd).toHaveBeenCalledTimes(2);
+  });
+
+  it('Tooltip align="end" pins it to the right edge', () => {
+    render(
+      <Tooltip content="Tip" align="end">
+        <button>Hi</button>
+      </Tooltip>,
+    );
+    expect(screen.getByText('Tip')).toHaveClass('right-0');
+  });
+
+  it('useConfirm resolves with the choice', async () => {
+    function Demo() {
+      const confirm = useConfirm();
+      const [answer, setAnswer] = useState('none');
+      return (
+        <>
+          <button onClick={async () => setAnswer(String(await confirm({ title: 'Sure?' })))}>
+            Ask
+          </button>
+          <p>answer: {answer}</p>
+        </>
+      );
+    }
+    render(
+      <ConfirmProvider>
+        <Demo />
+      </ConfirmProvider>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Ask' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+    expect(await screen.findByText('answer: true')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Ask' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
+    expect(await screen.findByText('answer: false')).toBeInTheDocument();
   });
 });

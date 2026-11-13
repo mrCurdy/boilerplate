@@ -8,7 +8,6 @@ import {
   Card,
   CardBody,
   Checkbox,
-  ConfirmDialog,
   EmptyState,
   FormField,
   Input,
@@ -17,6 +16,7 @@ import {
   Tabs,
   Textarea,
 } from '@/components/ui';
+import { useConfirm } from '@/context/ConfirmContext';
 import { useToast } from '@/context/ToastContext';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/cn';
@@ -27,11 +27,11 @@ type Filter = 'all' | 'open' | 'done';
 
 export default function Notes() {
   const toast = useToast();
+  const confirm = useConfirm();
   const [notes, setNotes] = useState<Note[] | null>(null);
   const [dbDriver, setDbDriver] = useState<string>('');
   const [filter, setFilter] = useState<Filter>('all');
   const [editing, setEditing] = useState<Note | 'new' | null>(null);
-  const [deleting, setDeleting] = useState<Note | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -68,11 +68,20 @@ export default function Notes() {
     setEditing(null);
   };
 
-  const remove = async () => {
-    if (!deleting) return;
-    await api.delete(`/notes/${deleting.id}`);
-    setNotes((ns) => ns?.filter((n) => n.id !== deleting.id) ?? null);
-    toast.success('Note deleted');
+  const remove = async (note: Note) => {
+    const ok = await confirm({
+      title: 'Delete note?',
+      description: `"${note.title}" will be permanently removed.`,
+      confirmLabel: 'Delete',
+    });
+    if (!ok) return;
+    try {
+      await api.delete(`/notes/${note.id}`);
+      setNotes((ns) => ns?.filter((n) => n.id !== note.id) ?? null);
+      toast.success('Note deleted');
+    } catch (err) {
+      toast.error('Delete failed', errorMessage(err));
+    }
   };
 
   const counts = {
@@ -147,7 +156,7 @@ export default function Notes() {
                 size="icon-sm"
                 aria-label="Delete"
                 className="text-danger"
-                onClick={() => setDeleting(note)}
+                onClick={() => remove(note)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -195,14 +204,6 @@ export default function Notes() {
         note={editing}
         onClose={() => setEditing(null)}
         onSaved={onSaved}
-      />
-      <ConfirmDialog
-        open={!!deleting}
-        onClose={() => setDeleting(null)}
-        onConfirm={remove}
-        title="Delete note?"
-        description={deleting ? `"${deleting.title}" will be permanently removed.` : undefined}
-        confirmLabel="Delete"
       />
     </>
   );

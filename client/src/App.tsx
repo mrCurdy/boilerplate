@@ -6,6 +6,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Spinner } from '@/components/ui';
 import { AppearanceProvider } from '@/context/AppearanceContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { ConfirmProvider } from '@/context/ConfirmContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ToastProvider } from '@/context/ToastContext';
 import Home from '@/pages/Home';
@@ -63,9 +64,11 @@ export default function App() {
     <ThemeProvider>
       <AppearanceProvider>
         <ToastProvider>
-          <AuthProvider>
-            <RouterProvider router={router} />
-          </AuthProvider>
+          <ConfirmProvider>
+            <AuthProvider>
+              <RouterProvider router={router} />
+            </AuthProvider>
+          </ConfirmProvider>
         </ToastProvider>
       </AppearanceProvider>
     </ThemeProvider>

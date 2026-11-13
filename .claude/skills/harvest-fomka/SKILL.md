@@ -64,7 +64,7 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
   - `mockApi`'s route also gets the request `Headers` (bearer check). `shared` got vitest + a test
     script, root `npm test` runs it first. Login test mocks `@/lib/socket`. Untested (no Node).
 
-- [ ] **3. UI kit additions**
+- [x] **3. UI kit additions**
   - `FOMKA/client/src/components/ui/CommitInput.tsx` (`CommitInput`, `CommitTextarea`).
   - `FOMKA/client/src/components/AddForm.tsx`, `ClearableInput.tsx` → `components/ui/`.
   - `Tooltip` `align="end"`, `PageHeader` centred on phones (diff both files).
@@ -73,6 +73,9 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
   - `styles/index.css`: the iOS 16px field rule (`@media (pointer: coarse)`), `scrollbar-thick`,
     `no-spin`. Not the `val-*` utilities (Fomka-only).
   - Text stays English literals in this step; step 6 moves it into the dictionary.
+  - `ClearableInput` takes `clearLabel` (default 'Clear'). UiKit's hand-built confirm Modal now uses
+    `useConfirm()`. `test/setup.ts` polyfills `<dialog>` `showModal`/`close` if jsdom lacks them.
+    Untested again (no Node, no node_modules): steps 1–3 still need lint/typecheck/test.
 
 - [ ] **4. Drag-and-drop containers**
   - `FOMKA/client/src/lib/useDragSort.ts` (incl. `free` mode) and `lib/useListsDragSort.ts`.

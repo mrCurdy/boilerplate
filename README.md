@@ -213,6 +213,8 @@ These keep the codebase reusable. Please follow them as the app grows.
 - **Authorization lives on the server:** `requireAuth` / `requireRole` on routes, `socket.data.user` in socket handlers. `ProtectedRoute` and `RoleGate` on the client are UX only.
 - **Config via env:** add new variables to the zod schema in `server/src/config.ts` (the server fails fast on invalid config), to `.env.example`, and to `docker-compose.yml` if Docker needs them.
 - **Errors:** throw `HttpError` on the server. On the client, show `toast.error(…)` or an inline `<Alert>`.
+- **Confirmations:** `if (await confirm({ title, description, confirmLabel })) …` with `useConfirm()`, not a `<ConfirmDialog>` plus open state per page.
+- **Inline edits:** a field that saves to the server uses `CommitInput` / `CommitTextarea` (one request on blur or Enter, Escape reverts), not a request per keystroke.
 - **Before committing:** `npm run lint && npm run typecheck && npm test`.
 
 ---
@@ -238,9 +240,10 @@ server/src/
 server/tests/      supertest + socket.io-client, run per DB driver
 client/src/
   styles/index.css design tokens (parameters → light/dark colors → Tailwind utilities)
-  components/ui/   the reusable style system (Button, Input, Card, Modal, Table, Slider, …)
+  components/ui/   the reusable style system (Button, Input, Card, Modal, Table, Slider, …,
+                   CommitInput/CommitTextarea, ClearableInput, AddForm)
   components/layout, components/auth (ProtectedRoute, RoleGate)
-  context/         Auth · Theme · Appearance · Toast
+  context/         Auth · Theme · Appearance · Toast · Confirm (useConfirm)
   lib/             api.ts (fetch + silent refresh) · socket.ts · appearance.ts · cn.ts · format.ts · errors.ts
                    numbers.ts (parseQty, parseNumber) · download.ts (downloadBlob)
   test/            setup.ts (jest-dom, cleanup) · fetch.ts (mockApi: a fake API for page tests)
@@ -282,6 +285,7 @@ Rooms used: `user:<id>` (all of a user's tabs), `role:admin` (live stats), `chat
 1. **Tokens:** `client/src/styles/index.css` has three layers. Layer 1 is a few _parameters_ (brand hue/chroma, neutral tint, font, radius, density, shadow). Layer 2 is semantic colors derived from them for light and `[data-theme='dark']`. Layer 3 is `@theme`, which maps everything to Tailwind utilities (`bg-surface`, `text-fg-muted`, `bg-primary`, `rounded-md`, `p-4`, …).
 2. **Components:** `client/src/components/ui/`, all imported from `@/components/ui`. Variants use `class-variance-authority`. Every component accepts `className`, merged with `cn()` so your classes win over the defaults.
 3. **Showcase:** the `/ui` page renders every component and variant.
+4. **Helpers in `index.css`:** `focus-ring`, `scrollbar-thin` / `scrollbar-thick`, `no-spin` (number inputs without arrows). On touch screens fields get at least 16px text, so iOS doesn't zoom in on focus.
 
 ### Appearance customizer
 
@@ -306,6 +310,7 @@ To add a parameter: add it to `appearanceSchema` and `DEFAULT_APPEARANCE`, map i
 | a 404 for a missing row | `found(await db.x.find(id), 'X')` from `server/src/lib/params.ts` (route params: `param(req, 'id')`)            |
 | a role                | `ROLES` in `shared/src/roles.ts` (order = rank) → `roleTone` in `AppShell.tsx`                                    |
 | an appearance setting | [Appearance customizer](#appearance-customizer)                                                                   |
+| a yes/no question     | `const confirm = useConfirm()` → `if (await confirm({ title: 'Delete?' })) …` (see `Notes.tsx`)                   |
 
 ---
 
