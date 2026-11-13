@@ -112,11 +112,11 @@ Token savers: never read `FOMKA/client/src/i18n/et.ts`/`ru.ts`, `package-lock.js
     `fieldErrors`. `lib/format.ts` takes a `locale`.
 
 - [ ] **7. i18n of the demo pages, part 1**: `AppShell` (NAV labels as `(t) => …`), `App.tsx`
-  fallbacks, `Login`, `Register`, `Forbidden`, `NotFound`, `Home`, `Profile`, `Notes`. Add each
-  page's section to `en.ts` and `ru.ts`. Server error messages stay English.
+      fallbacks, `Login`, `Register`, `Forbidden`, `NotFound`, `Home`, `Profile`, `Notes`. Add each
+      page's section to `en.ts` and `ru.ts`. Server error messages stay English.
 
 - [ ] **8. i18n of the demo pages, part 2**: `Moderation`, `Admin`, `Chat`, `Appearance`, `UiKit`.
-  Then a "Text" convention in the README: never hard-code UI text.
+      Then a "Text" convention in the README: never hard-code UI text.
 
 - [ ] **9. Permission matrix**
   - `FOMKA/shared/src/auth.ts` → `shared/src/permissions.ts`: `PERMISSIONS`, `MATRIX` for the

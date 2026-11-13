@@ -302,19 +302,19 @@ To add a parameter: add it to `appearanceSchema` and `DEFAULT_APPEARANCE`, map i
 
 ### Cheat sheet
 
-| I want to add…        | Touch                                                                                                             |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| a page                | `client/src/pages/X.tsx` → route in `App.tsx` (lazy, inside the right `ProtectedRoute`) → `NAV` in `AppShell.tsx` |
-| an API endpoint       | zod schema in `shared/src/schemas.ts` → router in `server/src/routes/` → mount in `app.ts`                        |
-| a UI component        | `client/src/components/ui/X.tsx` → export in `ui/index.ts` → demo on `UiKit.tsx`                                  |
-| a DB entity           | [walkthrough](#walkthrough-adding-a-feature-end-to-end) steps 1–3                                                 |
-| a socket event        | [Realtime](#realtime-socketio)                                                                                    |
-| an env variable       | `server/src/config.ts` schema → `.env.example` → `docker-compose.yml`                                             |
-| a 404 for a missing row | `found(await db.x.find(id), 'X')` from `server/src/lib/params.ts` (route params: `param(req, 'id')`)            |
-| a role                | `ROLES` in `shared/src/roles.ts` (order = rank) → `roleTone` in `AppShell.tsx`                                    |
-| an appearance setting | [Appearance customizer](#appearance-customizer)                                                                   |
-| drag to reorder       | `useDragSort` / `useListsDragSort` + `<DragHandle {...sort.handleProps(i)} />` (see `pages/uikit/DragDemos.tsx`) |
-| a yes/no question     | `const confirm = useConfirm()` → `if (await confirm({ title: 'Delete?' })) …` (see `Notes.tsx`)                   |
+| I want to add…          | Touch                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| a page                  | `client/src/pages/X.tsx` → route in `App.tsx` (lazy, inside the right `ProtectedRoute`) → `NAV` in `AppShell.tsx` |
+| an API endpoint         | zod schema in `shared/src/schemas.ts` → router in `server/src/routes/` → mount in `app.ts`                        |
+| a UI component          | `client/src/components/ui/X.tsx` → export in `ui/index.ts` → demo on `UiKit.tsx`                                  |
+| a DB entity             | [walkthrough](#walkthrough-adding-a-feature-end-to-end) steps 1–3                                                 |
+| a socket event          | [Realtime](#realtime-socketio)                                                                                    |
+| an env variable         | `server/src/config.ts` schema → `.env.example` → `docker-compose.yml`                                             |
+| a 404 for a missing row | `found(await db.x.find(id), 'X')` from `server/src/lib/params.ts` (route params: `param(req, 'id')`)              |
+| a role                  | `ROLES` in `shared/src/roles.ts` (order = rank) → `roleTone` in `AppShell.tsx`                                    |
+| an appearance setting   | [Appearance customizer](#appearance-customizer)                                                                   |
+| drag to reorder         | `useDragSort` / `useListsDragSort` + `<DragHandle {...sort.handleProps(i)} />` (see `pages/uikit/DragDemos.tsx`)  |
+| a yes/no question       | `const confirm = useConfirm()` → `if (await confirm({ title: 'Delete?' })) …` (see `Notes.tsx`)                   |
 
 ---
 
@@ -380,14 +380,14 @@ const fetch = mockApi((method, path, body, headers) => {
 
 ## Troubleshooting
 
-| Symptom                                               | Fix                                                                                                                                               |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Symptom                                                       | Fix                                                                                                                                                                                                                |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | The app behaves unlike the code (e.g. a new field is ignored) | Check what is serving :3000: `curl -s localhost:3000/api/health`. A `builtAt` older than your change (or `npm start` running `dist/`) is a stale build: rebuild/restart, or use `npm run dev` (`commit: "source"`) |
-| Server exits with `Invalid environment configuration` | The message lists each bad variable. Usually the JWT secrets are missing or shorter than 32 chars                                                 |
-| `better-sqlite3` error after switching Node versions  | `npm rebuild better-sqlite3`                                                                                                                      |
-| Logged out on every reload in production              | Site served over plain http with `HTTPS_ONLY=true`, so the browser drops the Secure refresh cookie. Use HTTPS (or `HTTPS_ONLY=false` for testing) |
-| CORS or socket errors in dev                          | `CLIENT_URL` must match the Vite origin (`http://localhost:5173`). In Docker, set `PUBLIC_URL`                                                    |
-| Port 3000 / 5173 / 5432 already in use                | Change `PORT`, the Vite `server.port` in `client/vite.config.ts`, or `APP_PORT` / `POSTGRES_PORT` for Docker                                      |
-| Web font doesn't load                                 | Google Fonts blocked by the network or your CSP. Pick the "System UI" font or self-host the font                                                  |
-| Old schema in dev after editing migration 1           | Delete `data/` (SQLite/JSON) or `docker compose down -v` (Postgres) and restart                                                                   |
-| `npm install` warns about TypeScript peer versions    | TypeScript is pinned to `~6.0` because `typescript-eslint` doesn't support 6.1+/7 yet. Bump both together                                         |
+| Server exits with `Invalid environment configuration`         | The message lists each bad variable. Usually the JWT secrets are missing or shorter than 32 chars                                                                                                                  |
+| `better-sqlite3` error after switching Node versions          | `npm rebuild better-sqlite3`                                                                                                                                                                                       |
+| Logged out on every reload in production                      | Site served over plain http with `HTTPS_ONLY=true`, so the browser drops the Secure refresh cookie. Use HTTPS (or `HTTPS_ONLY=false` for testing)                                                                  |
+| CORS or socket errors in dev                                  | `CLIENT_URL` must match the Vite origin (`http://localhost:5173`). In Docker, set `PUBLIC_URL`                                                                                                                     |
+| Port 3000 / 5173 / 5432 already in use                        | Change `PORT`, the Vite `server.port` in `client/vite.config.ts`, or `APP_PORT` / `POSTGRES_PORT` for Docker                                                                                                       |
+| Web font doesn't load                                         | Google Fonts blocked by the network or your CSP. Pick the "System UI" font or self-host the font                                                                                                                   |
+| Old schema in dev after editing migration 1                   | Delete `data/` (SQLite/JSON) or `docker compose down -v` (Postgres) and restart                                                                                                                                    |
+| `npm install` warns about TypeScript peer versions            | TypeScript is pinned to `~6.0` because `typescript-eslint` doesn't support 6.1+/7 yet. Bump both together                                                                                                          |

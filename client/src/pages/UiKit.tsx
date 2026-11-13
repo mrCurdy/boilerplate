@@ -502,7 +502,10 @@ export default function UiKit() {
           </Card>
         </Section>
 
-        <Section title="Overlays" description="Modal (native <dialog>), useConfirm(), Dropdown, Tooltip.">
+        <Section
+          title="Overlays"
+          description="Modal (native <dialog>), useConfirm(), Dropdown, Tooltip."
+        >
           <Demo label="Modal & dropdown">
             <Button onClick={() => setModalOpen(true)}>Open modal</Button>
             <Button

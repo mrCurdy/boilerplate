@@ -78,7 +78,9 @@ describe('UI components', () => {
 
   it('ClearableInput shows the clear button only with onClear', async () => {
     const onClear = vi.fn();
-    const { rerender } = render(<ClearableInput aria-label="Limit" value={5} onCommit={() => {}} />);
+    const { rerender } = render(
+      <ClearableInput aria-label="Limit" value={5} onCommit={() => {}} />,
+    );
     expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
     rerender(<ClearableInput aria-label="Limit" value={5} onCommit={() => {}} onClear={onClear} />);
     await userEvent.click(screen.getByRole('button', { name: 'Clear' }));
