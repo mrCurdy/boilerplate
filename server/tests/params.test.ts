@@ -1,6 +1,5 @@
 import type { Request } from 'express';
 import { describe, expect, it } from 'vitest';
-import { HttpError } from '../src/lib/errors';
 import { dateParam, found, param } from '../src/lib/params';
 
 const req = (params: Record<string, string>) => ({ params }) as unknown as Request;
@@ -21,6 +20,8 @@ describe('route param helpers', () => {
   it('found passes values through and turns null/false into 404', () => {
     expect(found(0, 'X')).toBe(0);
     for (const missing of [null, false])
-      expect(() => found(missing, 'Note')).toThrow(new HttpError(404, 'Note not found'));
+      expect(() => found(missing, 'Note')).toThrow(
+        expect.objectContaining({ status: 404, code: 'NOT_FOUND', message: 'Note not found' }),
+      );
   });
 });
